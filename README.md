@@ -82,11 +82,11 @@ Aucune version minimale de Home Assistant n'est annoncée tant que la carte n'a 
 4. Installer **WiFiTIC Card** et recharger le navigateur.
 
 > [!NOTE]
-> Le fichier JavaScript est désormais présent dans le dépôt. La procédure HACS dépend de la reconnaissance du dépôt par votre version de HACS ; si l'installation n'est pas proposée, utiliser la méthode manuelle ci-dessous.
+> Le dépôt contient le fichier `hacs.json` et le composant installable dans `dist/`, selon la structure attendue pour un plugin Lovelace HACS.
 
 ### Option B — Installation manuelle
 
-1. Télécharger [`wifitic-energy-card.js`](wifitic-energy-card.js).
+1. Télécharger [`wifitic-energy-card.js`](dist/wifitic-energy-card.js).
 2. Copier le fichier dans `/config/www/wifitic-energy-card.js`.
 3. Dans **Paramètres → Tableaux de bord → ⋮ → Ressources**, ajouter :
 
