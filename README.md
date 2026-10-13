@@ -1,4 +1,4 @@
-# 📊 WiFiTIC Lovelace Card — v0.0.1
+# 📊 WiFiTIC Lovelace Card
 
 [![GitHub Release](https://img.shields.io/github/v/release/AuroreVgn/wifiTIC_card?style=flat-square)](https://github.com/AuroreVgn/wifiTIC_card/releases)
 [![Licence MIT](https://img.shields.io/badge/licence-MIT-4c9a2a?style=flat-square)](LICENSE)
