@@ -33,18 +33,20 @@ Elle a pour objectif de rassembler dans une carte les données électriques expo
 > [!IMPORTANT]
 > Ce projet communautaire est **non officiel**, indépendant de [Cartelectronic](https://cartelectronic.fr/accueil/136-wifitic.html), d'Enedis et de Home Assistant.
 
-> [!WARNING]
-> **La carte n'est pas encore distribuée :** le fichier JavaScript installable n'est pas présent dans ce dépôt. Les fonctionnalités et la configuration ci-dessous sont présentées comme des objectifs et seront confirmées à la publication du code.
-
-## ✨ Fonctionnalités prévues
+## ✨ Fonctionnalités
 
 - Affichage des informations électriques issues de l'intégration WiFiTIC.
 - Visualisation de la puissance soutirée et de l'injection vers le réseau.
 - Présentation des index de consommation par période tarifaire.
 - Affichage des informations de contrat et de période tarifaire lorsqu'elles sont disponibles.
 - Présentation adaptée à un tableau de bord Lovelace.
-
-Les éventuels modes d'affichage, options de personnalisation, actions et fonctions d'éditeur graphique seront documentés **après vérification du code JavaScript**.
+- Deux modes d'affichage : **Détaillé** et **Compact**.
+- Graphique local des puissances soutirée et injectée, construit depuis l'ouverture de la carte (jusqu'à une heure).
+- Affichage des index tarifaires, mesures, diagnostics et relais disponibles en mode détaillé.
+- Éditeur graphique permettant de choisir les entités, le mode, le titre et l'affichage du graphique.
+- Résolution automatique des entités WiFiTIC lorsqu'elles peuvent être identifiées sans ambiguïté.
+- Compatibilité avec les thèmes clair et sombre.
+- Actualisation ciblée du contenu pour limiter les sauts de défilement sur iOS Safari.
 
 ## 📸 Aperçus
 
@@ -52,7 +54,7 @@ Les éventuels modes d'affichage, options de personnalisation, actions et foncti
 | :---: | :---: |
 | <img src="assets/dark.png" alt="WiFiTIC Card — aperçu en mode sombre" width="340"> | <img src="assets/light.png" alt="WiFiTIC Card — aperçu en mode clair" width="340"> |
 
-Les images illustrent l'apparence du projet. Les fonctionnalités effectives dépendront de la version JavaScript publiée.
+Les captures montrent les thèmes clair et sombre de la carte.
 
 ## 📋 Prérequis
 
@@ -60,7 +62,7 @@ La carte est conçue pour fonctionner avec l'intégration **[WiFiTIC pour Home A
 
 L'intégration récupère les informations du module via **MQTT** et l'**API REST locale**. Elle doit être installée et configurée avant d'utiliser la carte.
 
-Les entités effectivement nécessaires à la carte seront précisées lorsque le code sera disponible.
+La carte propose des correspondances automatiques avec les capteurs WiFiTIC ; les entités peuvent aussi être sélectionnées manuellement dans l'éditeur graphique.
 
 ## 🛡️ Compatibilité
 
@@ -74,22 +76,60 @@ Aucune version minimale de Home Assistant n'est annoncée tant que la carte n'a 
 
 ### Option A — HACS
 
-> [!WARNING]
-> **Pas encore disponible.** Le dépôt ne contient actuellement aucun composant JavaScript installable. L'ajouter à HACS ne suffit donc pas à installer une carte fonctionnelle.
+1. Ouvrir **HACS** dans Home Assistant.
+2. Dans les **dépôts personnalisés**, ajouter `https://github.com/AuroreVgn/wifiTIC_card`.
+3. Choisir le type **Dashboard / Plugin** selon la version de HACS.
+4. Installer **WiFiTIC Card** et recharger le navigateur.
 
-Après publication du composant, cette rubrique précisera la procédure d'ajout du dépôt personnalisé dans **HACS → Frontend / Dashboard**.
+> [!NOTE]
+> Le fichier JavaScript est désormais présent dans le dépôt. La procédure HACS dépend de la reconnaissance du dépôt par votre version de HACS ; si l'installation n'est pas proposée, utiliser la méthode manuelle ci-dessous.
 
 ### Option B — Installation manuelle
 
-La procédure manuelle, le nom du fichier JavaScript et son URL de ressource Lovelace seront indiqués **après publication**. Aucun chemin de ressource n'est fourni à ce stade pour éviter une configuration invalide.
+1. Télécharger [`wifitic-energy-card.js`](wifitic-energy-card.js).
+2. Copier le fichier dans `/config/www/wifitic-energy-card.js`.
+3. Dans **Paramètres → Tableaux de bord → ⋮ → Ressources**, ajouter :
+
+```text
+/local/wifitic-energy-card.js
+```
+
+Type : **Module JavaScript**.
+
+4. Recharger complètement le navigateur (`Ctrl+F5` ou `Cmd+Shift+R`).
 
 ## ⚙️ Configuration minimale
 
-La syntaxe YAML de la carte (`type: custom:...`) n'est pas encore confirmée par un fichier JavaScript publié. Elle sera ajoutée ici dès que le composant sera disponible.
+Ajouter une carte manuelle :
+
+```yaml
+type: custom:wifitic-energy-card
+```
+
+Le titre par défaut est **WiFiTIC — Électricité**. Le mode initial est **Détaillé** et le graphique est activé.
 
 ## ⚙️ Exemple de configuration complète
 
-Les options YAML et leurs valeurs par défaut seront documentées à partir de l'implémentation réelle, sans présumer de paramètres qui pourraient ne pas exister.
+```yaml
+type: custom:wifitic-energy-card
+title: WiFiTIC — Électricité
+mode: detailed
+show_graph: true
+
+# Facultatif : personnaliser les entités si nécessaire
+# import_power: sensor.votre_puissance_soutiree
+# export_power: sensor.votre_puissance_injectee
+# tariff_period: sensor.votre_periode_tarifaire
+```
+
+| Option | Valeur par défaut | Description |
+| --- | --- | --- |
+| `title` | `WiFiTIC — Électricité` | Titre de la carte |
+| `mode` | `detailed` | `detailed` ou `compact` |
+| `show_graph` | `true` | Afficher le graphique en mode détaillé |
+| `import_power`, `export_power`, etc. | Automatique | Surcharge des entités détectées |
+
+Les entités peuvent être renseignées dans le YAML ou sélectionnées depuis l'éditeur graphique.
 
 ## 📊 Entités utilisées
 
@@ -109,25 +149,51 @@ Les identifiants `sensor.*` exacts peuvent dépendre des noms attribués par Hom
 
 ## 🎛️ Modes d'affichage
 
-Les captures disponibles présentent deux **thèmes** (clair et sombre). Elles ne prouvent pas l'existence de modes fonctionnels distincts tels que « détaillé » ou « compact ». Cette section sera complétée lors de la publication du composant.
+### Détaillé
+
+Affiche les quatre indicateurs principaux (puissances et énergies du jour), le graphique des puissances si activé, les index tarifaires, les mesures et diagnostics, ainsi que les relais disponibles.
+
+Le graphique est construit **localement**, à partir des mesures reçues pendant que la carte est ouverte : il ne recharge pas l'historique Recorder.
+
+### Compact
+
+Affiche les quatre indicateurs principaux sans les sections supplémentaires. Ce mode convient aux tableaux de bord plus denses.
 
 ## 🎨 Éditeur graphique
 
-La présence et les options d'un éditeur visuel Home Assistant restent à confirmer à partir du JavaScript publié.
+L'éditeur permet de configurer :
+
+- le titre ;
+- le mode **Détaillé / Compact** ;
+- l'affichage du graphique ;
+- les entités de puissance, énergie, période tarifaire, index, contrat, diagnostics et relais.
+
+Les entités renseignées manuellement sont prioritaires sur les correspondances automatiques.
 
 ## 📱 Responsive / mobile
 
-Le comportement sur mobile et les dimensions prises en charge seront précisés après tests du composant.
+La carte utilise une grille de deux colonnes et adapte la taille des valeurs aux petits écrans. La version v10 limite les remplacements du contenu lors des mises à jour afin de préserver autant que possible le **défilement et le focus sur Safari iOS**.
+
+> [!NOTE]
+> Ce correctif est intégré au JavaScript, mais son comportement doit encore être confirmé sur les différentes versions de Safari iOS et de Home Assistant.
 
 ## 🛠️ Dépannage
 
 ### La carte n'apparaît pas
 
-Vérifier d'abord que le fichier JavaScript de la carte a bien été publié et installé. **À ce stade, ce fichier est absent du dépôt.**
+Vérifier que `/local/wifitic-energy-card.js` est enregistrée comme **Module JavaScript**, puis forcer l'actualisation du navigateur.
 
 ### Les données ne s'affichent pas
 
-Vérifier dans **Outils de développement → États** que l'intégration WiFiTIC est opérationnelle et que ses capteurs reçoivent des valeurs. Les problèmes propres à l'affichage de la carte ne pourront être diagnostiqués qu'une fois son code disponible.
+Dans **Outils de développement → États**, vérifier que les capteurs WiFiTIC existent et reçoivent des valeurs. Si les identifiants ont été personnalisés, sélectionner explicitement les bonnes entités dans l'éditeur.
+
+### Le graphique est vide
+
+Il se construit progressivement **depuis l'ouverture de la carte**. Il faut au moins deux échantillons pour tracer les courbes.
+
+### Les changements ne sont pas visibles
+
+Après avoir remplacé le JavaScript, forcer l'actualisation du navigateur pour éviter de conserver l'ancienne version en cache.
 
 ## 🤝 Contributions et problèmes
 
