@@ -1,4 +1,4 @@
-# 📊 WiFiTIC Lovelace Card
+# 📊 WiFiTIC Lovelace Card — v1.0.0
 
 [![GitHub Release](https://img.shields.io/github/v/release/AuroreVgn/wifiTIC_card?style=flat-square)](https://github.com/AuroreVgn/wifiTIC_card/releases)
 [![Licence MIT](https://img.shields.io/badge/licence-MIT-4c9a2a?style=flat-square)](LICENSE)
@@ -172,7 +172,7 @@ Les entités renseignées manuellement sont prioritaires sur les correspondances
 
 ## 📱 Responsive / mobile
 
-La carte utilise une grille de deux colonnes et adapte la taille des valeurs aux petits écrans. La version v10 limite les remplacements du contenu lors des mises à jour afin de préserver autant que possible le **défilement et le focus sur Safari iOS**.
+La carte utilise une grille de deux colonnes et adapte la taille des valeurs aux petits écrans. La version v1.0.0 limite les remplacements du contenu lors des mises à jour afin de préserver autant que possible le **défilement et le focus sur Safari iOS**.
 
 > [!NOTE]
 > Ce correctif est intégré au JavaScript, mais son comportement doit encore être confirmé sur les différentes versions de Safari iOS et de Home Assistant.
