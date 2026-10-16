@@ -26,21 +26,23 @@ Si cette carte vous est utile et que vous souhaitez soutenir son développement 
 
 ## 📑 Sommaire
 
-- [⚠️ Important](#-important)
-- [✨ Fonctionnalités](#-fonctionnalités)
-- [📸 Aperçus](#-aperçus)
-- [📋 Prérequis](#-prérequis)
-- [🛡️ Compatibilité](#-compatibilité)
-- [📦 Installation](#-installation)
-- [⚙️ Configuration minimale](#-configuration-minimale)
-- [⚙️ Exemple de configuration complète](#-exemple-de-configuration-complète)
-- [📊 Entités utilisées](#-entités-utilisées)
-- [🎛️ Modes d'affichage](#-modes-daffichage)
-- [🎨 Éditeur graphique](#-éditeur-graphique)
-- [📱 Responsive / mobile](#-responsive--mobile)
-- [🛠️ Dépannage](#-dépannage)
-- [🤝 Contributions et problèmes](#-contributions-et-problèmes)
-- [📄 Licence](#-licence)
+- [⚠️ Important](#toc-section-1)
+- [✨ Fonctionnalités](#toc-section-2)
+- [📸 Aperçus](#toc-section-3)
+- [📋 Prérequis](#toc-section-4)
+- [🛡️ Compatibilité](#toc-section-5)
+- [📦 Installation](#toc-section-6)
+- [⚙️ Configuration minimale](#toc-section-7)
+- [⚙️ Exemple de configuration complète](#toc-section-8)
+- [📊 Entités utilisées](#toc-section-9)
+- [🎛️ Modes d'affichage](#toc-section-10)
+- [🎨 Éditeur graphique](#toc-section-11)
+- [📱 Responsive / mobile](#toc-section-12)
+- [🛠️ Dépannage](#toc-section-13)
+- [🤝 Contributions et problèmes](#toc-section-14)
+- [📄 Licence](#toc-section-15)
+
+<a name="toc-section-1"></a>
 
 ## ⚠️ Important
 
@@ -50,6 +52,8 @@ Elle a pour objectif de rassembler dans une carte les données électriques expo
 
 > [!IMPORTANT]
 > Ce projet communautaire est **non officiel**, indépendant de [Cartelectronic](https://cartelectronic.fr/accueil/136-wifitic.html), d'Enedis et de Home Assistant.
+
+<a name="toc-section-2"></a>
 
 ## ✨ Fonctionnalités
 
@@ -66,6 +70,8 @@ Elle a pour objectif de rassembler dans une carte les données électriques expo
 - Compatibilité avec les thèmes clair et sombre.
 - Actualisation ciblée du contenu pour limiter les sauts de défilement sur iOS Safari.
 
+<a name="toc-section-3"></a>
+
 ## 📸 Aperçus
 
 | Mode sombre | Mode clair |
@@ -73,6 +79,8 @@ Elle a pour objectif de rassembler dans une carte les données électriques expo
 | <img src="assets/dark.png" alt="WiFiTIC Card — aperçu en mode sombre" width="340"> | <img src="assets/light.png" alt="WiFiTIC Card — aperçu en mode clair" width="340"> |
 
 Les captures montrent les thèmes clair et sombre de la carte.
+
+<a name="toc-section-4"></a>
 
 ## 📋 Prérequis
 
@@ -82,6 +90,8 @@ L'intégration récupère les informations du module via **MQTT** et l'**API RES
 
 La carte propose des correspondances automatiques avec les capteurs WiFiTIC ; les entités peuvent aussi être sélectionnées manuellement dans l'éditeur graphique.
 
+<a name="toc-section-5"></a>
+
 ## 🛡️ Compatibilité
 
 - **Home Assistant** avec un tableau de bord Lovelace.
@@ -89,6 +99,8 @@ La carte propose des correspondances automatiques avec les capteurs WiFiTIC ; le
 - Données disponibles selon le contrat Linky et les informations remontées par le module.
 
 Aucune version minimale de Home Assistant n'est annoncée tant que la carte n'a pas été testée et publiée.
+
+<a name="toc-section-6"></a>
 
 ## 📦 Installation
 
@@ -116,6 +128,8 @@ Type : **Module JavaScript**.
 
 4. Recharger complètement le navigateur (`Ctrl+F5` ou `Cmd+Shift+R`).
 
+<a name="toc-section-7"></a>
+
 ## ⚙️ Configuration minimale
 
 Ajouter une carte manuelle :
@@ -125,6 +139,8 @@ type: custom:wifitic-energy-card
 ```
 
 Le titre par défaut est **WiFiTIC — Électricité**. Le mode initial est **Détaillé** et le graphique est activé.
+
+<a name="toc-section-8"></a>
 
 ## ⚙️ Exemple de configuration complète
 
@@ -149,6 +165,8 @@ show_graph: true
 
 Les entités peuvent être renseignées dans le YAML ou sélectionnées depuis l'éditeur graphique.
 
+<a name="toc-section-9"></a>
+
 ## 📊 Entités utilisées
 
 La carte exploitera les données fournies par l'intégration WiFiTIC. Parmi les entités disponibles côté intégration :
@@ -165,6 +183,8 @@ La carte exploitera les données fournies par l'intégration WiFiTIC. Parmi les 
 
 Les identifiants `sensor.*` exacts peuvent dépendre des noms attribués par Home Assistant. **Ce tableau décrit l'intégration, pas encore une liste d'entités obligatoires pour la carte.**
 
+<a name="toc-section-10"></a>
+
 ## 🎛️ Modes d'affichage
 
 ### Détaillé
@@ -177,6 +197,8 @@ Le graphique est construit **localement**, à partir des mesures reçues pendant
 
 Affiche les quatre indicateurs principaux sans les sections supplémentaires. Ce mode convient aux tableaux de bord plus denses.
 
+<a name="toc-section-11"></a>
+
 ## 🎨 Éditeur graphique
 
 L'éditeur permet de configurer :
@@ -188,12 +210,16 @@ L'éditeur permet de configurer :
 
 Les entités renseignées manuellement sont prioritaires sur les correspondances automatiques.
 
+<a name="toc-section-12"></a>
+
 ## 📱 Responsive / mobile
 
 La carte utilise une grille de deux colonnes et adapte la taille des valeurs aux petits écrans. La version v0.0.1 limite les remplacements du contenu lors des mises à jour afin de préserver autant que possible le **défilement et le focus sur Safari iOS**.
 
 > [!NOTE]
 > Ce correctif est intégré au JavaScript, mais son comportement doit encore être confirmé sur les différentes versions de Safari iOS et de Home Assistant.
+
+<a name="toc-section-13"></a>
 
 ## 🛠️ Dépannage
 
@@ -213,11 +239,15 @@ Il se construit progressivement **depuis l'ouverture de la carte**. Il faut au m
 
 Après avoir remplacé le JavaScript, forcer l'actualisation du navigateur pour éviter de conserver l'ancienne version en cache.
 
+<a name="toc-section-14"></a>
+
 ## 🤝 Contributions et problèmes
 
 Les retours, corrections et propositions d'amélioration sont les bienvenus dans les [issues du dépôt WiFiTIC Card](https://github.com/AuroreVgn/wifiTIC_card/issues).
 
 Pour faciliter l'analyse, indiquer la version de Home Assistant, celle de l'intégration WiFiTIC, le navigateur utilisé et les étapes permettant de reproduire le problème. Ne pas publier de données personnelles ni d'identifiants.
+
+<a name="toc-section-15"></a>
 
 ## 📄 Licence
 
