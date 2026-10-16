@@ -24,6 +24,24 @@ Si cette carte vous est utile et que vous souhaitez soutenir son développement 
   </a>
 </p>
 
+## 📑 Sommaire
+
+- [⚠️ Important](#-important)
+- [✨ Fonctionnalités](#-fonctionnalités)
+- [📸 Aperçus](#-aperçus)
+- [📋 Prérequis](#-prérequis)
+- [🛡️ Compatibilité](#-compatibilité)
+- [📦 Installation](#-installation)
+- [⚙️ Configuration minimale](#-configuration-minimale)
+- [⚙️ Exemple de configuration complète](#-exemple-de-configuration-complète)
+- [📊 Entités utilisées](#-entités-utilisées)
+- [🎛️ Modes d'affichage](#-modes-daffichage)
+- [🎨 Éditeur graphique](#-éditeur-graphique)
+- [📱 Responsive / mobile](#-responsive--mobile)
+- [🛠️ Dépannage](#-dépannage)
+- [🤝 Contributions et problèmes](#-contributions-et-problèmes)
+- [📄 Licence](#-licence)
+
 ## ⚠️ Important
 
 Carte Lovelace personnalisée **Home Assistant** conçue pour l'[intégration WiFiTIC](https://github.com/AuroreVgn/wifiTIC), destinée aux compteurs Linky équipés du module **[WiFiTIC de Cartelectronic](https://cartelectronic.fr/accueil/136-wifitic.html)**.
