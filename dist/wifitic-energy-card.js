@@ -1,4 +1,4 @@
-/* WiFiTIC Energy Card v0.0.1 — standalone Home Assistant custom card */
+/* WiFiTIC Energy Card v0.0.2 — standalone Home Assistant custom card */
 const FIELDS = [
   ['import_power','Puissance soutirée estimée'], ['export_power','Puissance injectée'],
   ['apparent_power','Puissance apparente soutirée'], ['consumption_today','Énergie soutirée aujourd’hui'],
