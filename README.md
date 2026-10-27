@@ -63,7 +63,7 @@ Elle a pour objectif de rassembler dans une carte les données électriques expo
 - Affichage des informations de contrat et de période tarifaire lorsqu'elles sont disponibles.
 - Présentation adaptée à un tableau de bord Lovelace.
 - Deux modes d'affichage : **Détaillé** et **Compact**.
-- Affichage des puissances en **tuiles** ou en **jauges circulaires**, avec échelle réglable (6 000 W par défaut).
+- Affichage des puissances en **tuiles** ou en **jauges circulaires**, avec échelles indépendantes pour le soutirage et l'injection (6 000 W par défaut chacune).
 - Libellés des index tarifaires raccourcis automatiquement, sans préfixe WiFiTIC.
 - Graphique local des puissances soutirée et injectée, construit depuis l'ouverture de la carte (jusqu'à une heure).
 - Affichage des index tarifaires, mesures, diagnostics et relais disponibles en mode détaillé.
@@ -152,7 +152,8 @@ title: WiFiTIC — Électricité
 mode: detailed
 show_graph: true
 power_display: gauges # tiles ou gauges
-power_gauge_max: 6000 # puissance maximale des jauges, en W
+power_gauge_max_import: 6000 # maximum de la jauge soutirée, en W
+power_gauge_max_export: 6000 # maximum de la jauge injectée, en W
 
 # Facultatif : personnaliser les entités si nécessaire
 # import_power: sensor.votre_puissance_soutiree
@@ -166,7 +167,9 @@ power_gauge_max: 6000 # puissance maximale des jauges, en W
 | `mode` | `detailed` | `detailed` ou `compact` |
 | `show_graph` | `true` | Afficher le graphique en mode détaillé |
 | `power_display` | `tiles` | `tiles` (tuiles) ou `gauges` (jauges) |
-| `power_gauge_max` | `6000` | Maximum des jauges, en watts |
+| `power_gauge_max_import` | `6000` | Maximum de la jauge soutirée, en watts |
+| `power_gauge_max_export` | `6000` | Maximum de la jauge injectée, en watts |
+| `power_gauge_max` | `6000` | Ancien maximum commun, conservé pour les configurations existantes |
 | `import_power`, `export_power`, etc. | Automatique | Surcharge des entités détectées |
 
 Les entités peuvent être renseignées dans le YAML ou sélectionnées depuis l'éditeur graphique.
@@ -212,7 +215,7 @@ L'éditeur permet de configurer :
 - le titre ;
 - le mode **Détaillé / Compact** ;
 - l'affichage du graphique ;
-- l'affichage des puissances en tuiles ou en jauges et le maximum des jauges ;
+- l'affichage des puissances en tuiles ou en jauges et le maximum de chaque jauge indépendamment ;
 - les entités de puissance, énergie, période tarifaire, index, contrat, diagnostics et relais.
 
 Les entités renseignées manuellement sont prioritaires sur les correspondances automatiques.
