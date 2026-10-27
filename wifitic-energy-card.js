@@ -70,7 +70,7 @@ const norm = s => String(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').
 const esc = v => String(v ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const tariffIcon = p => { const s=norm(p); return s.includes('creuse')?'mdi:moon-waning-crescent':s.includes('pleine')?'mdi:white-balance-sunny':'mdi:calendar-clock'; };
 const indexLabel = (label, contract) => {
-  const short = String(label || '').replace(/^WiFiTIC\s*[-–—:]\s*/i, '').replace(/^Index énergie soutirée\s*[-–—:]\s*/i, '').trim();
+  const short = String(label || '').replace(/^WiFiTIC(?:\s*[-–—:]\s*|\s+)/i, '').replace(/^Index\s+énergie\s+soutirée\s*[-–—:]\s*/i, '').trim();
   return norm(contract).includes('zen flex') && norm(short).includes('pointe') ? short.replace(/pointe/ig, 'sobriété') : short;
 };
 const num = v => { const n = Number(v); return Number.isFinite(n) ? n : null; };
@@ -229,8 +229,8 @@ class WiFiTICEnergyCardEditor extends HTMLElement{
     const power=this.shadowRoot.querySelector('#power-display');
     if(power && power.value!==(this._config.power_display==='gauges'?'gauges':'tiles'))power.value=this._config.power_display==='gauges'?'gauges':'tiles';
     const gaugeMax=this.shadowRoot.querySelector('#power-gauge-max');
-    if(gaugeMax && this.shadowRoot.activeElement!==gaugeMax)gaugeMax.value=String(this._config.power_gauge_max||6000);
-    if(gaugeMax)gaugeMax.closest('.row').hidden=this._config.power_display!=='gauges';
+    if(gaugeMax && this.shadowRoot.activeElement!==gaugeMax && gaugeMax.value!==String(this._config.power_gauge_max||6000))gaugeMax.value=String(this._config.power_gauge_max||6000);
+    if(gaugeMax)gaugeMax.closest('.row').style.display=this._config.power_display==='gauges'?'':'none';
     const graph=this.shadowRoot.querySelector('#show-graph');
     if(graph && graph.value!==(this._config.show_graph!==false))graph.value=this._config.show_graph!==false;
     this.shadowRoot.querySelectorAll('ha-entity-picker').forEach(el=>{
@@ -247,12 +247,13 @@ class WiFiTICEnergyCardEditor extends HTMLElement{
       .row{margin:12px 0}
       label{display:block;margin-bottom:6px;font-size:14px;color:var(--primary-text-color)}
       ha-textfield,ha-entity-picker,ha-selector{display:block;width:100%;box-sizing:border-box}
+      input[type=number]{display:block;width:100%;box-sizing:border-box;min-height:42px;padding:10px 12px;border:1px solid var(--divider-color);border-radius:8px;background:var(--card-background-color,var(--ha-card-background));color:var(--primary-text-color);font:inherit}
       .hint{font-size:13px;color:var(--secondary-text-color)}
     </style>
     <div class="row"><label>Titre</label><ha-textfield id="title"></ha-textfield></div>
     <div class="row"><label>Affichage</label><ha-selector id="mode"></ha-selector></div>
     <div class="row"><label>Affichage des puissances</label><ha-selector id="power-display"></ha-selector></div>
-    <div class="row"><label>Maximum des jauges (W)</label><ha-textfield id="power-gauge-max" type="number" min="1"></ha-textfield></div>
+    <div class="row"><label>Maximum des jauges (W)</label><input id="power-gauge-max" type="number" min="1" step="100" inputmode="numeric" aria-label="Maximum des jauges en watts"></div>
     <div class="row"><label>Afficher le graphique</label><ha-selector id="show-graph"></ha-selector></div>
     <p class="hint">Associer les entités WiFiTIC.</p>
     ${FIELDS.map(([key,label])=>`<div class="row"><label>${esc(label)}</label><ha-entity-picker data-key="${key}" allow-custom-entity></ha-entity-picker></div>`).join('')}`;
