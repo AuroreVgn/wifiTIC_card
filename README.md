@@ -63,6 +63,8 @@ Elle a pour objectif de rassembler dans une carte les données électriques expo
 - Affichage des informations de contrat et de période tarifaire lorsqu'elles sont disponibles.
 - Présentation adaptée à un tableau de bord Lovelace.
 - Deux modes d'affichage : **Détaillé** et **Compact**.
+- Affichage des puissances en **tuiles** ou en **jauges circulaires**, avec échelle réglable (6 000 W par défaut).
+- Libellés des index tarifaires raccourcis automatiquement, sans préfixe WiFiTIC.
 - Graphique local des puissances soutirée et injectée, construit depuis l'ouverture de la carte (jusqu'à une heure).
 - Affichage des index tarifaires, mesures, diagnostics et relais disponibles en mode détaillé.
 - Éditeur graphique permettant de choisir les entités, le mode, le titre et l'affichage du graphique.
@@ -149,6 +151,8 @@ type: custom:wifitic-energy-card
 title: WiFiTIC — Électricité
 mode: detailed
 show_graph: true
+power_display: gauges # tiles ou gauges
+power_gauge_max: 6000 # puissance maximale des jauges, en W
 
 # Facultatif : personnaliser les entités si nécessaire
 # import_power: sensor.votre_puissance_soutiree
@@ -161,6 +165,8 @@ show_graph: true
 | `title` | `WiFiTIC — Électricité` | Titre de la carte |
 | `mode` | `detailed` | `detailed` ou `compact` |
 | `show_graph` | `true` | Afficher le graphique en mode détaillé |
+| `power_display` | `tiles` | `tiles` (tuiles) ou `gauges` (jauges) |
+| `power_gauge_max` | `6000` | Maximum des jauges, en watts |
 | `import_power`, `export_power`, etc. | Automatique | Surcharge des entités détectées |
 
 Les entités peuvent être renseignées dans le YAML ou sélectionnées depuis l'éditeur graphique.
@@ -206,6 +212,7 @@ L'éditeur permet de configurer :
 - le titre ;
 - le mode **Détaillé / Compact** ;
 - l'affichage du graphique ;
+- l'affichage des puissances en tuiles ou en jauges et le maximum des jauges ;
 - les entités de puissance, énergie, période tarifaire, index, contrat, diagnostics et relais.
 
 Les entités renseignées manuellement sont prioritaires sur les correspondances automatiques.
@@ -214,7 +221,7 @@ Les entités renseignées manuellement sont prioritaires sur les correspondances
 
 ## 📱 Responsive / mobile
 
-La carte utilise une grille de deux colonnes et adapte la taille des valeurs aux petits écrans. La version v0.0.1 limite les remplacements du contenu lors des mises à jour afin de préserver autant que possible le **défilement et le focus sur Safari iOS**.
+La carte utilise une grille de deux colonnes et adapte la taille des valeurs aux petits écrans. La carte actualise les éléments modifiés sans reconstruire le conteneur Lovelace, y compris avec les jauges, afin de préserver autant que possible le **défilement et le focus sur Safari iOS**.
 
 > [!NOTE]
 > Ce correctif est intégré au JavaScript, mais son comportement doit encore être confirmé sur les différentes versions de Safari iOS et de Home Assistant.
