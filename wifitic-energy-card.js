@@ -118,7 +118,10 @@ class WiFiTICEnergyCard extends HTMLElement {
     // Arc-style gauges inspired by Home Assistant energy dashboards.
     // Keep SVG nodes stable: patchChildren updates values and the indicator without remounting the card.
     const gauge=(label,key,sub,kind)=> {
-      const raw=this.number(key), max=Math.max(1,num(this._config.power_gauge_max)||6000);
+      const raw=this.number(key);
+      const maxKey=kind==='import'?'power_gauge_max_import':'power_gauge_max_export';
+      const configured=num(this._config[maxKey])||num(this._config.power_gauge_max)||6000;
+      const max=Math.max(1,configured);
       const ratio=raw===null?0:Math.min(1,Math.max(0,raw/max));
       const polar=angle=>({x:60+46*Math.cos(angle*Math.PI/180),y:60+46*Math.sin(angle*Math.PI/180)});
       const start=polar(150),end=polar(390),indicator=polar(150+240*ratio);
@@ -228,9 +231,13 @@ class WiFiTICEnergyCardEditor extends HTMLElement{
     if(mode && mode.value!==(this._config.mode==='compact'?'compact':'detailed'))mode.value=this._config.mode==='compact'?'compact':'detailed';
     const power=this.shadowRoot.querySelector('#power-display');
     if(power && power.value!==(this._config.power_display==='gauges'?'gauges':'tiles'))power.value=this._config.power_display==='gauges'?'gauges':'tiles';
-    const gaugeMax=this.shadowRoot.querySelector('#power-gauge-max');
-    if(gaugeMax && this.shadowRoot.activeElement!==gaugeMax && gaugeMax.value!==String(this._config.power_gauge_max||6000))gaugeMax.value=String(this._config.power_gauge_max||6000);
-    if(gaugeMax)gaugeMax.closest('.row').style.display=this._config.power_display==='gauges'?'':'none';
+    for(const [id,key] of [['#power-gauge-max-import','power_gauge_max_import'],['#power-gauge-max-export','power_gauge_max_export']]){
+      const field=this.shadowRoot.querySelector(id);
+      if(!field)continue;
+      const value=String(this._config[key]||this._config.power_gauge_max||6000);
+      if(this.shadowRoot.activeElement!==field && field.value!==value)field.value=value;
+      field.closest('.row').style.display=this._config.power_display==='gauges'?'':'none';
+    }
     const graph=this.shadowRoot.querySelector('#show-graph');
     if(graph && graph.value!==(this._config.show_graph!==false))graph.value=this._config.show_graph!==false;
     this.shadowRoot.querySelectorAll('ha-entity-picker').forEach(el=>{
@@ -253,7 +260,8 @@ class WiFiTICEnergyCardEditor extends HTMLElement{
     <div class="row"><label>Titre</label><ha-textfield id="title"></ha-textfield></div>
     <div class="row"><label>Affichage</label><ha-selector id="mode"></ha-selector></div>
     <div class="row"><label>Affichage des puissances</label><ha-selector id="power-display"></ha-selector></div>
-    <div class="row"><label>Maximum des jauges (W)</label><input id="power-gauge-max" type="number" min="1" step="100" inputmode="numeric" aria-label="Maximum des jauges en watts"></div>
+    <div class="row"><label>Maximum de la jauge soutirée (W)</label><input id="power-gauge-max-import" type="number" min="1" step="100" inputmode="numeric" aria-label="Maximum de la jauge soutirée en watts"></div>
+    <div class="row"><label>Maximum de la jauge injectée (W)</label><input id="power-gauge-max-export" type="number" min="1" step="100" inputmode="numeric" aria-label="Maximum de la jauge injectée en watts"></div>
     <div class="row"><label>Afficher le graphique</label><ha-selector id="show-graph"></ha-selector></div>
     <p class="hint">Associer les entités WiFiTIC.</p>
     ${FIELDS.map(([key,label])=>`<div class="row"><label>${esc(label)}</label><ha-entity-picker data-key="${key}" allow-custom-entity></ha-entity-picker></div>`).join('')}`;
@@ -276,11 +284,13 @@ class WiFiTICEnergyCardEditor extends HTMLElement{
       if(this._suppress)return;
       if(['tiles','gauges'].includes(e.detail?.value))this.change('power_display',e.detail.value);
     });
-    const gaugeMax=this.shadowRoot.querySelector('#power-gauge-max');
-    gaugeMax.addEventListener('change',()=>{
-      const v=Number(gaugeMax.value);
-      if(Number.isFinite(v)&&v>0)this.change('power_gauge_max',v);
-    });
+    for(const [id,key] of [['#power-gauge-max-import','power_gauge_max_import'],['#power-gauge-max-export','power_gauge_max_export']]){
+      const field=this.shadowRoot.querySelector(id);
+      field.addEventListener('change',()=>{
+        const v=Number(field.value);
+        if(Number.isFinite(v)&&v>0)this.change(key,v);
+      });
+    }
     const graph=this.shadowRoot.querySelector('#show-graph');
     graph.hass=this._hass;
     graph.selector={boolean:{}};
