@@ -1,4 +1,4 @@
-/* WiFiTIC Energy Card v0.0.1 — standalone Home Assistant custom card */
+/* WiFiTIC Energy Card v0.0.2 — standalone Home Assistant custom card */
 const FIELDS = [
   ['import_power','Puissance soutirée estimée'], ['export_power','Puissance injectée'],
   ['apparent_power','Puissance apparente soutirée'], ['consumption_today','Énergie soutirée aujourd’hui'],
@@ -69,15 +69,18 @@ const FIELD_ALIASES = {
 const norm = s => String(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
 const esc = v => String(v ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const tariffIcon = p => { const s=norm(p); return s.includes('creuse')?'mdi:moon-waning-crescent':s.includes('pleine')?'mdi:white-balance-sunny':'mdi:calendar-clock'; };
-const indexLabel = (label, contract) => norm(contract).includes('zen flex') && norm(label).includes('pointe') ? label.replace(/pointe/ig,'sobriété') : label;
+const indexLabel = (label, contract) => {
+  const short = String(label || '').replace(/^WiFiTIC\s*[-–—:]\s*/i, '').replace(/^Index énergie soutirée\s*[-–—:]\s*/i, '').trim();
+  return norm(contract).includes('zen flex') && norm(short).includes('pointe') ? short.replace(/pointe/ig, 'sobriété') : short;
+};
 const num = v => { const n = Number(v); return Number.isFinite(n) ? n : null; };
 class WiFiTICEnergyCard extends HTMLElement {
   constructor(){super();this.attachShadow({mode:'open'});this._config={};this._history=[];this._lastSample=null;}
-  setConfig(config){ if(!config || typeof config !== 'object') throw Error('Configuration invalide'); this._config={title:'WiFiTIC — Électricité',mode:'detailed',show_graph:true,...config}; this.render(); }
+  setConfig(config){ if(!config || typeof config !== 'object') throw Error('Configuration invalide'); this._config={title:'WiFiTIC — Électricité',mode:'detailed',show_graph:true,power_display:'tiles',power_gauge_max:6000,...config}; this.render(); }
   set hass(hass){this._hass=hass;this.sample();const signature=JSON.stringify([this._config,...FIELDS.map(([key])=>{const st=this.state(key);return st?[st.state,st.last_updated,st.attributes?.friendly_name]:null;})]);if(signature!==this._lastRenderSignature){this._lastRenderSignature=signature;this.render();}}
   getCardSize(){return this._config.mode==='compact'?3:7;}
   static getConfigElement(){return document.createElement('wifitic-energy-card-editor');}
-  static getStubConfig(){return {type:'custom:wifitic-energy-card',title:'WiFiTIC — Électricité',mode:'detailed',show_graph:true};}
+  static getStubConfig(){return {type:'custom:wifitic-energy-card',title:'WiFiTIC — Électricité',mode:'detailed',show_graph:true,power_display:'tiles',power_gauge_max:6000};}
   entity(key){
     const states=this._hass?.states||{};
     // Explicit user selections always win, including an unavailable entity.
@@ -112,15 +115,28 @@ class WiFiTICEnergyCard extends HTMLElement {
   }
   render(){if(!this.shadowRoot)return;const compact=this._config.mode==='compact';const period=this.value('tariff_period')||'Indisponible';
     const tile=(label,val,sub,kind='')=>`<div class="tile ${kind}"><div class="label">${label}</div><div class="value">${val}</div>${sub?`<div class="sub">${sub}</div>`:''}</div>`;
+    // CSS-only gauge: updating the value never rebuilds the card or scroll container.
+    const gauge=(label,key,sub,kind)=> {
+      const raw=this.number(key), max=Math.max(1,num(this._config.power_gauge_max)||6000);
+      const percentage=raw===null?0:Math.min(100,Math.max(0,raw/max*100));
+      return `<div class="tile gauge-tile ${kind}"><div class="label">${label}</div><div class="gauge" role="meter" aria-label="${label}" aria-valuemin="0" aria-valuemax="${max}" aria-valuenow="${raw===null?0:raw}"><div class="gauge-ring" style="--gauge-progress:${percentage}%"><div class="gauge-inner"><div class="value">${this.fmt(key,'W')}</div><div class="gauge-scale">0 — ${max.toLocaleString('fr-FR')} W</div></div></div></div><div class="sub">${sub}</div></div>`;
+    };
+    const powerTiles=this._config.power_display==='gauges'
+      ? gauge('Puissance soutirée','import_power',`Apparente : ${this.fmt('apparent_power','VA')} · Coefficient : 0,95`,'import')+gauge('Puissance injectée','export_power','Export vers le réseau','export')
+      : tile('Puissance soutirée',this.fmt('import_power','W'),`Apparente : ${this.fmt('apparent_power','VA')} · Coefficient : 0,95`,'import')+tile('Puissance injectée',this.fmt('export_power','W'),'Export vers le réseau','export');
     const more=compact?'':`${this._config.show_graph===false?'':`<section><div class="section-title">Puissance instantanée <small>Historique depuis l’ouverture de la carte, max. 1 h</small></div>${this.graph()}<div class="legend"><span>● Puissance soutirée (W)</span><span>● Puissance injectée</span></div></section>`}<section><div class="section-title">Index tarifaires</div><div class="indexes">${[1,2,3,4,5,6].filter(i=>this.state('index_'+i)).map(i=>`<div><span>${esc(indexLabel(this.state('index_'+i)?.attributes?.friendly_name||'Index '+i,this.value('contract_name')))}</span><strong>${this.fmt('index_'+i,'kWh',1000,2)}</strong></div>`).join('')}</div></section><section><div class="section-title">Mesures et diagnostic</div><div class="indexes"><div><span>Intensité</span><strong>${this.fmt('current','A')}</strong></div><div><span>Tension</span><strong>${this.fmt('voltage','V')}</strong></div><div><span>État TIC</span><strong>${esc(this.value('tic_state')||'—')}</strong></div><div><span>Contrat</span><strong>${esc(this.value('contract_name')||'—')}</strong></div><div><span>Période fournisseur actuelle</span><strong>${esc(this.value('supplier_today')??'—')}</strong></div><div><span>Période fournisseur demain</span><strong>${esc(this.value('supplier_tomorrow')??'—')}</strong></div></div></section>${this.relaySection()}`;
-    const markup=`<style>:host{display:block;color:var(--primary-text-color);font-family:var(--paper-font-body1_-_font-family,inherit)}ha-card{padding:18px;border-radius:var(--ha-card-border-radius,14px);overflow:hidden}.top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px}.title{font-size:18px;font-weight:650}.pill{font-size:12px;padding:5px 10px;border-radius:20px;background:var(--secondary-background-color);text-align:right}.tiles{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.tile{background:var(--secondary-background-color);padding:14px;border-radius:12px;min-width:0}.label,.sub{font-size:12px;color:var(--secondary-text-color)}.value{font-size:24px;font-weight:700;margin:5px 0;white-space:nowrap}.import .value{color:#dc932c}.export .value{color:#269e8c}section{margin-top:20px}.section-title{font-weight:650;margin-bottom:10px;display:flex;flex-wrap:wrap;justify-content:space-between;gap:5px}.section-title small{font-weight:400;color:var(--secondary-text-color);font-size:11px}svg{width:100%;height:130px;display:block;background:var(--secondary-background-color);border-radius:9px}.legend{display:flex;gap:20px;font-size:12px;margin-top:6px;color:var(--secondary-text-color)}.legend span:first-child{color:#dc932c}.legend span:last-child{color:#269e8c}.indexes>div{display:flex;justify-content:space-between;gap:12px;border-bottom:1px solid var(--divider-color);padding:8px 0;font-size:13px}.indexes span{min-width:0;overflow-wrap:anywhere;color:var(--secondary-text-color)}.indexes strong{text-align:right;white-space:nowrap}.empty{padding:25px 12px;text-align:center;font-size:12px;color:var(--secondary-text-color);background:var(--secondary-background-color);border-radius:9px}.foot{margin-top:12px;font-size:11px;color:var(--secondary-text-color)}@media(max-width:370px){.value{font-size:19px}.tile{padding:10px}}</style><ha-card><div class="top"><div class="title">${esc(this._config.title)}</div><div class="pill"><ha-icon icon="${tariffIcon(period)}" style="--mdc-icon-size:18px;vertical-align:middle;margin-right:5px"></ha-icon>${esc(period)}</div></div><div class="tiles">${tile('Puissance soutirée',this.fmt('import_power','W'),`Apparente : ${this.fmt('apparent_power','VA')} · Coefficient : 0,95`,'import')}${tile('Puissance injectée',this.fmt('export_power','W'),'Export vers le réseau','export')}${tile('Énergie soutirée aujourd’hui',this.fmt('consumption_today','kWh',1000,2),'Depuis minuit')}${tile('Énergie injectée aujourd’hui',this.fmt('production_today','kWh',1000,2),'Depuis minuit')}</div>${more}<div class="foot">Mesures MQTT · Soutirage en W calculé à partir des VA (coefficient indicatif : 0,95)</div></ha-card>`;
+    const markup=`<style>:host{display:block;color:var(--primary-text-color);font-family:var(--paper-font-body1_-_font-family,inherit)}ha-card{padding:18px;border-radius:var(--ha-card-border-radius,14px);overflow:hidden}.top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px}.title{font-size:18px;font-weight:650}.pill{font-size:12px;padding:5px 10px;border-radius:20px;background:var(--secondary-background-color);text-align:right}.tiles{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.tile{background:var(--secondary-background-color);padding:14px;border-radius:12px;min-width:0}.label,.sub{font-size:12px;color:var(--secondary-text-color)}.value{font-size:24px;font-weight:700;margin:5px 0;white-space:nowrap}.gauge{display:flex;justify-content:center;margin:10px 0}.gauge-ring{width:min(100%,150px);aspect-ratio:1;border-radius:50%;display:grid;place-items:center;background:conic-gradient(var(--gauge-color) var(--gauge-progress),var(--divider-color) var(--gauge-progress));padding:10px;box-sizing:border-box}.gauge-inner{width:100%;height:100%;border-radius:50%;background:var(--card-background-color,var(--ha-card-background,#202020));display:flex;flex-direction:column;align-items:center;justify-content:center}.gauge-scale{font-size:10px;color:var(--secondary-text-color);margin-top:3px}.gauge-tile .value{font-size:21px;margin:0}.import{--gauge-color:#dc932c}.export{--gauge-color:#269e8c}.import .value{color:#dc932c}.export .value{color:#269e8c}section{margin-top:20px}.section-title{font-weight:650;margin-bottom:10px;display:flex;flex-wrap:wrap;justify-content:space-between;gap:5px}.section-title small{font-weight:400;color:var(--secondary-text-color);font-size:11px}svg{width:100%;height:130px;display:block;background:var(--secondary-background-color);border-radius:9px}.legend{display:flex;gap:20px;font-size:12px;margin-top:6px;color:var(--secondary-text-color)}.legend span:first-child{color:#dc932c}.legend span:last-child{color:#269e8c}.indexes>div{display:flex;justify-content:space-between;gap:12px;border-bottom:1px solid var(--divider-color);padding:8px 0;font-size:13px}.indexes span{min-width:0;overflow-wrap:anywhere;color:var(--secondary-text-color)}.indexes strong{text-align:right;white-space:nowrap}.empty{padding:25px 12px;text-align:center;font-size:12px;color:var(--secondary-text-color);background:var(--secondary-background-color);border-radius:9px}.foot{margin-top:12px;font-size:11px;color:var(--secondary-text-color)}@media(max-width:370px){.value{font-size:19px}.tile{padding:10px}}</style><ha-card><div class="top"><div class="title">${esc(this._config.title)}</div><div class="pill"><ha-icon icon="${tariffIcon(period)}" style="--mdc-icon-size:18px;vertical-align:middle;margin-right:5px"></ha-icon>${esc(period)}</div></div><div class="tiles">${powerTiles}${tile('Énergie soutirée aujourd’hui',this.fmt('consumption_today','kWh',1000,2),'Depuis minuit')}${tile('Énergie injectée aujourd’hui',this.fmt('production_today','kWh',1000,2),'Depuis minuit')}</div>${more}<div class="foot">Mesures MQTT · Soutirage en W calculé à partir des VA (coefficient indicatif : 0,95)</div></ha-card>`;
     if(!this._cardMounted){
       this.shadowRoot.innerHTML=markup;
       this._cardMounted=true;
     } else {
+      // Keep the original <ha-card> mounted on iOS; update CSS in place.
+      const nextStyle=markup.match(/^<style>([\s\S]*?)<\/style>/)?.[1];
+      const style=this.shadowRoot.querySelector('style');
+      if(style&&nextStyle!==undefined&&style.textContent!==nextStyle)style.textContent=nextStyle;
       const body=markup.match(/<ha-card>([\s\S]*)<\/ha-card>$/)?.[1];
       const card=this.shadowRoot.querySelector('ha-card');
-      if(card&&body!==undefined&&card.innerHTML!==body){
+      if(card&&body!==undefined){
         const template=document.createElement('template');template.innerHTML=body;
         this.patchChildren(card,template.content);
       }
@@ -202,6 +218,11 @@ class WiFiTICEnergyCardEditor extends HTMLElement{
     if(title&&this.shadowRoot.activeElement!==title)title.value=this._config.title||'WiFiTIC — Électricité';
     const mode=this.shadowRoot.querySelector('#mode');
     if(mode && mode.value!==(this._config.mode==='compact'?'compact':'detailed'))mode.value=this._config.mode==='compact'?'compact':'detailed';
+    const power=this.shadowRoot.querySelector('#power-display');
+    if(power && power.value!==(this._config.power_display==='gauges'?'gauges':'tiles'))power.value=this._config.power_display==='gauges'?'gauges':'tiles';
+    const gaugeMax=this.shadowRoot.querySelector('#power-gauge-max');
+    if(gaugeMax && this.shadowRoot.activeElement!==gaugeMax)gaugeMax.value=String(this._config.power_gauge_max||6000);
+    if(gaugeMax)gaugeMax.closest('.row').hidden=this._config.power_display!=='gauges';
     const graph=this.shadowRoot.querySelector('#show-graph');
     if(graph && graph.value!==(this._config.show_graph!==false))graph.value=this._config.show_graph!==false;
     this.shadowRoot.querySelectorAll('ha-entity-picker').forEach(el=>{
@@ -220,6 +241,8 @@ class WiFiTICEnergyCardEditor extends HTMLElement{
     </style>
     <div class="row"><label>Titre</label><ha-textfield id="title"></ha-textfield></div>
     <div class="row"><label>Affichage</label><ha-selector id="mode"></ha-selector></div>
+    <div class="row"><label>Affichage des puissances</label><ha-selector id="power-display"></ha-selector></div>
+    <div class="row"><label>Maximum des jauges (W)</label><ha-textfield id="power-gauge-max" type="number" min="1"></ha-textfield></div>
     <div class="row"><label>Afficher le graphique</label><ha-selector id="show-graph"></ha-selector></div>
     <p class="hint">Associer les entités WiFiTIC.</p>
     ${FIELDS.map(([key,label])=>`<div class="row"><label>${esc(label)}</label><ha-entity-picker data-key="${key}" allow-custom-entity></ha-entity-picker></div>`).join('')}`;
@@ -233,6 +256,19 @@ class WiFiTICEnergyCardEditor extends HTMLElement{
       if(this._suppress)return;
       const value=e.detail?.value;
       if(value==='compact'||value==='detailed')this.change('mode',value);
+    });
+    const power=this.shadowRoot.querySelector('#power-display');
+    power.hass=this._hass;
+    power.selector={select:{mode:'dropdown',options:[{value:'tiles',label:'Tuiles'},{value:'gauges',label:'Jauges'}]}};
+    power.addEventListener('value-changed',e=>{
+      e.stopPropagation();
+      if(this._suppress)return;
+      if(['tiles','gauges'].includes(e.detail?.value))this.change('power_display',e.detail.value);
+    });
+    const gaugeMax=this.shadowRoot.querySelector('#power-gauge-max');
+    gaugeMax.addEventListener('change',()=>{
+      const v=Number(gaugeMax.value);
+      if(Number.isFinite(v)&&v>0)this.change('power_gauge_max',v);
     });
     const graph=this.shadowRoot.querySelector('#show-graph');
     graph.hass=this._hass;
