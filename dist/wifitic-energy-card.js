@@ -231,7 +231,9 @@ class WiFiTICEnergyCardEditor extends HTMLElement{
     const graph=this.shadowRoot.querySelector('#show-graph');
     if(graph && graph.value!==(this._config.show_graph!==false))graph.value=this._config.show_graph!==false;
     this.shadowRoot.querySelectorAll('ha-entity-picker').forEach(el=>{
-      el.value=this._config[el.dataset.key]||this.findDefaultEntity(el.dataset.key)||'';
+      const wanted=this._config[el.dataset.key]||this.findDefaultEntity(el.dataset.key)||'';
+      // Avoid resetting unchanged pickers during HA updates (focus/scroll on iOS).
+      if(el.value!==wanted && this.shadowRoot.activeElement!==el)el.value=wanted;
     });
     // Ignore value-changed events caused by assigning control values programmatically.
     queueMicrotask(()=>{this._suppress=false;});
