@@ -1,5 +1,14 @@
 # 📊 WiFiTIC Lovelace Card
 
+> [!IMPORTANT]
+> **WiFiTIC Card est maintenant intégrée directement à [l'intégration WiFiTIC](https://github.com/AuroreVgn/wifiTIC).**
+> Ce dépôt autonome est conservé comme archive et référence historique. **Ne l'installez plus séparément via HACS / Marketplace** : la carte et ses mises à jour sont désormais fournies par l'intégration principale.
+>
+> **Migration :** mettez à jour WiFiTIC, vérifiez la ressource `/wifitic/wifitic-energy-card.js`, retirez l'ancienne ressource `/hacsfiles/wifiTIC_card/wifitic-energy-card.js` (ou `/local/wifitic-energy-card.js`), puis désinstallez l'ancien plugin. Gardez vos cartes `type: custom:wifitic-energy-card` telles quelles. Évitez de charger les deux ressources simultanément.
+>
+> [**Instructions complètes d'installation et de migration**](https://github.com/AuroreVgn/wifiTIC#toc-section-7)
+
+
 [![GitHub Release](https://img.shields.io/github/v/release/AuroreVgn/wifiTIC_card?style=flat-square)](https://github.com/AuroreVgn/wifiTIC_card/releases)
 [![Licence MIT](https://img.shields.io/badge/licence-MIT-4c9a2a?style=flat-square)](LICENSE)
 [![Home Assistant](https://img.shields.io/badge/Home%20Assistant-Compatible-41BDF5.svg?style=flat-square&logo=homeassistant)](https://www.home-assistant.io/)
@@ -104,37 +113,19 @@ Aucune version minimale de Home Assistant n'est annoncée tant que la carte n'a 
 
 <a name="toc-section-6"></a>
 
-## 📦 Installation
+## 📦 Installation (via l'intégration WiFiTIC)
 
-> [!NOTE]
-> **Marketplace / HACS (Home Assistant 2026.11+)** — À partir de Home Assistant 2026.11, ouvrez **Paramètres → Marketplace** : HACS est désormais intégré à Home Assistant, sans installation séparée. Recherchez ce projet dans le catalogue ou ajoutez son URL GitHub comme **dépôt personnalisé** s'il n'est pas encore référencé. Sur Home Assistant 2026.10 et versions antérieures, continuez à utiliser **HACS**. Les liens et badges `hacs_repository` ci-dessous restent compatibles avec Marketplace. Après installation, suivez les instructions ci-dessous pour ajouter la carte au tableau de bord. Les extensions restent communautaires et ne sont pas des intégrations officielles.
->
+La carte **n'est plus distribuée comme plugin indépendant**. Installez ou mettez à jour [WiFiTIC](https://github.com/AuroreVgn/wifiTIC) depuis Marketplace / HACS, puis redémarrez Home Assistant.
 
+La ressource `/wifitic/wifitic-energy-card.js` est exposée par l'intégration et enregistrée automatiquement lorsque la configuration Lovelace le permet. Si elle n'est pas présente, ajoutez-la manuellement comme **Module JavaScript** dans les ressources du tableau de bord.
 
+Utilisez ensuite :
 
-### Option A — HACS
-
-1. Ouvrir **HACS** dans Home Assistant.
-2. Dans les **dépôts personnalisés**, ajouter `https://github.com/AuroreVgn/wifiTIC_card`.
-3. Choisir le type **Dashboard / Plugin** selon la version de HACS.
-4. Installer **WiFiTIC Card** et recharger le navigateur.
-
-> [!NOTE]
-> Le dépôt contient le fichier `hacs.json` et le composant installable dans `dist/`, selon la structure attendue pour un plugin Lovelace HACS.
-
-### Option B — Installation manuelle
-
-1. Télécharger [`wifitic-energy-card.js`](dist/wifitic-energy-card.js).
-2. Copier le fichier dans `/config/www/wifitic-energy-card.js`.
-3. Dans **Paramètres → Tableaux de bord → ⋮ → Ressources**, ajouter :
-
-```text
-/local/wifitic-energy-card.js
+```yaml
+type: custom:wifitic-energy-card
 ```
 
-Type : **Module JavaScript**.
-
-4. Recharger complètement le navigateur (`Ctrl+F5` ou `Cmd+Shift+R`).
+Si vous aviez installé l'ancien plugin, suivez les [instructions de migration](https://github.com/AuroreVgn/wifiTIC#toc-section-7) avant de le désinstaller. Les réglages des cartes existantes ne changent pas.
 
 <a name="toc-section-7"></a>
 
@@ -241,7 +232,7 @@ La carte utilise une grille de deux colonnes et adapte la taille des valeurs aux
 
 ### La carte n'apparaît pas
 
-Vérifier que `/local/wifitic-energy-card.js` est enregistrée comme **Module JavaScript**, puis forcer l'actualisation du navigateur.
+Vérifier que `/wifitic/wifitic-energy-card.js` est enregistrée comme **Module JavaScript** (automatiquement ou manuellement), supprimer les anciennes ressources en doublon, puis forcer l'actualisation du navigateur.
 
 ### Les données ne s'affichent pas
 
@@ -259,7 +250,7 @@ Après avoir remplacé le JavaScript, forcer l'actualisation du navigateur pour 
 
 ## 🤝 Contributions et problèmes
 
-Les retours, corrections et propositions d'amélioration sont les bienvenus dans les [issues du dépôt WiFiTIC Card](https://github.com/AuroreVgn/wifiTIC_card/issues).
+Pour les nouvelles corrections, améliorations et problèmes, utiliser les [issues du dépôt principal WiFiTIC](https://github.com/AuroreVgn/wifiTIC/issues). Ce dépôt autonome est conservé à titre historique.
 
 Pour faciliter l'analyse, indiquer la version de Home Assistant, celle de l'intégration WiFiTIC, le navigateur utilisé et les étapes permettant de reproduire le problème. Ne pas publier de données personnelles ni d'identifiants.
 
